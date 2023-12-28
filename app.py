@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, jsonify
 import numpy as np
-from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
+from keras.models import load_model
+import pickle
 
 app = Flask(__name__)
 
 # Load the trained models
-model = load_model(r'D:\ADCET_HACKATHON\New folder\categorical_model.h5')
-binary_model = load_model(r'D:\ADCET_HACKATHON\New folder\binary_model.h5')
+categorical_model = load_model('categorical_model.h5')
+binary_model = pickle.load(open('binary_model.pkl', 'rb'))
 
 # Load the scaler (used during training)
 scaler = StandardScaler()
@@ -21,18 +22,25 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        data = request.get_json()
-        features = [float(data[f'feature{i}']) for i in range(1, 15)]
+        # Print received form data
+        print('Received Form Data:', request.form)
 
-        # Preprocess the input data using the scaler
-        features_scaled = scaler.transform([features])
+        # Extract features from the form data
+        features = [float(request.form[f'feature{i}']) for i in range(1, 2)]  # Convert features 1 to 7 to float
+        features.append(int(request.form['feature2']))  # Keep feature 8 (sex) as an integer
+        features += [float(request.form[f'feature{i}']) for i in range(3, 13)]  # Convert features 9 to 13 to float
+        features.append(int(request.form['feature14']))  # Keep feature 14 as an integer
+
+# Preprocess the input data using the scaler
+        features_scaled = scaler.transform(np.array([features]))
+
 
         # Make predictions using both models
-        categorical_pred = int(np.argmax(model.predict(features_scaled), axis=1)[0])
+        categorical_pred = int(np.argmax(categorical_model.predict(features_scaled), axis=1)[0])
         binary_pred = int(np.round(binary_model.predict(features_scaled))[0])
 
         return jsonify({'categorical_pred': categorical_pred, 'binary_pred': binary_pred})
-    
+
     except Exception as e:
         return jsonify({'error': str(e)})
 
