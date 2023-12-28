@@ -1,26 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heart Disease Diagnosis</title>
 </head>
+
 <body>
     <h1>Heart Disease Diagnosis</h1>
-    <form id="diagnosisForm">
-        <!-- Add input fields based on your model's features -->
-        <label for="sex">Sex:</label>
-<select id="sex" name="sex">
-    <option value="0">Female</option>
-    <option value="1">Male</option>
-</select>
+    <form id="diagnosisForm" action="/result" method="POST">
 
-<!-- Add more input fields for other features -->
-
+        <!-- Add input fields for all 14 attributes -->
         <label for="age">Age:</label>
-        <input type="text" id="age" name="age" required>
+        <input type="text" id="age" name="feature1" required>
 
-        <!-- Add more input fields for other features -->
+        <label for="sex">Sex:</label>
+        <select id="sex" name="feature2">
+            <option value="0">Female</option>
+            <option value="1">Male</option>
+        </select>
+
+        <label for="cp">Chest Pain Type:</label>
+        <input type="text" id="cp" name="feature3" required>
+
+        <label for="trestbps">Resting Blood Pressure:</label>
+        <input type="text" id="trestbps" name="feature4" required>
+
+        <label for="chol">Cholesterol:</label>
+        <input type="text" id="chol" name="feature5" required>
+
+        <label for="fbs">Fasting Blood Sugar:</label>
+        <input type="text" id="fbs" name="feature6" required>
+
+        <label for="restecg">Resting Electrocardiographic Results:</label>
+        <input type="text" id="restecg" name="feature7" required>
+
+        <label for="thalach">Maximum Heart Rate Achieved:</label>
+        <input type="text" id="thalach" name="feature8" required>
+
+        <label for="exang">Exercise Induced Angina:</label>
+        <input type="text" id="exang" name="feature9" required>
+
+        <label for="oldpeak">Oldpeak:</label>
+        <input type="text" id="oldpeak" name="feature10" required>
+
+        <label for="slope">Slope of the Peak Exercise ST Segment:</label>
+        <input type="text" id="slope" name="feature11" required>
+
+        <label for="ca">Number of Major Vessels Colored by Fluoroscopy:</label>
+        <input type="text" id="ca" name="feature12" required>
+
+        <label for="thal">Thal:</label>
+        <input type="text" id="thal" name="feature13" required>
+
+        <label for="class">Class:</label>
+        <input type="text" id="class" name="feature14" required>
 
         <button type="button" onclick="predict()">Predict</button>
     </form>
@@ -29,41 +64,30 @@
 
     <script>
         function predict() {
-    const form = document.getElementById('diagnosisForm');
-    const formData = new FormData(form);
-    const data = {};
-    formData.forEach((value, key) => {
-        data[key] = value;
-    });
+            const form = document.getElementById('diagnosisForm');
+            const formData = new FormData(form);
 
-    console.log('Sending data:', data);
+            console.log('Sending data:', formData);
 
-    fetch('/predict', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    })
-    .then(response => response.json())
-    .then(result => {
-        console.log('Received result:', result);
-        document.getElementById('result').innerHTML = `
-            <p>Multi-class Prediction: ${result.categorical_pred}</p>
-            <p>Binary Prediction: ${result.binary_pred}</p>
-        `;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('result').innerHTML = 'An error occurred during prediction.';
-    });
-}
-
-
-
-
-
+            fetch('/predict', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Received result:', result);
+                document.getElementById('result').innerHTML = `
+                    <p>Multi-class Prediction: ${result.categorical_pred}</p>
+                    <p>Binary Prediction: ${result.binary_pred}</p>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'An error occurred during prediction.';
+            });
+        }
     </script>
-    
+
 </body>
+
 </html>
