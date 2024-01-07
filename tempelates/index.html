@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heart Disease Diagnosis</title>
+    <link rel="stylesheet" href="./abcd.css">
 </head>
 
 <body>
-    <h1>Heart Disease Diagnosis</h1>
+    <h1 style="color: blue;">Heart Disease Diagnosis</h1>
     <form id="diagnosisForm" action="/result" method="POST">
 
         <!-- Add input fields for all 14 attributes -->
@@ -67,26 +68,38 @@
             const form = document.getElementById('diagnosisForm');
             const formData = new FormData(form);
 
-            console.log('Sending data:', formData);
+            // Display loading spinner or message
+            document.getElementById('result').innerHTML = '<p>Loading...</p>';
 
             fetch('/predict', {
                 method: 'POST',
                 body: formData,
             })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Received result:', result);
-                document.getElementById('result').innerHTML = `
+                .then(response => response.json())
+                .then(result => {
+                    console.log('Received result:', result);
+
+                    // Determine binary prediction based on categorical prediction
+                    const binaryPrediction = result.categorical_pred > 0 ? 1 : 0;
+
+                    // Display prediction results
+                    document.getElementById('result').innerHTML = `
                     <p>Multi-class Prediction: ${result.categorical_pred}</p>
-                    <p>Binary Prediction: ${result.binary_pred}</p>
+                    <p>Binary Prediction: ${binaryPrediction}</p>
                 `;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('result').innerHTML = 'An error occurred during prediction.';
-            });
+
+                    // Optionally, clear the form after prediction
+                    form.reset();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+
+                    // Display error message
+                    document.getElementById('result').innerHTML = 'An error occurred during prediction.';
+                });
         }
     </script>
+
 
 </body>
 
